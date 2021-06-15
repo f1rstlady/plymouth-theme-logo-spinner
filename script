@@ -1,0 +1,123 @@
+fun init () {
+    // Background
+    Window.SetBackgroundTopColor (0.0, 0.0, 0.0);
+    Window.SetBackgroundBottomColor (0.0, 0.0, 0.0);
+
+    // Logo
+    logo.image = Image ("logo.png");
+    logo.sprite = Sprite (logo.image);
+    logo.x = Window.GetX () + (Window.GetWidth () - logo.image.GetWidth ()) / 2;
+    logo.y = Window.GetY () + Window.GetHeight () * 0.4;
+    logo.z = 10000;
+    logo.sprite.SetPosition (logo.x, logo.y, logo.z);
+
+    // Message
+    message = Sprite ();
+
+    // Spinner
+    spinner.image = Image ("spinner.png");
+    spinner.sprite = Sprite (spinner.image);
+    spinner.x = Window.GetX () + (Window.GetWidth () - spinner.image.GetWidth ()) / 2;
+    spinner.y = Window.GetY () + Window.GetHeight () * 0.7;
+	spinner.z = 10000;
+	spinner.sprite.SetPosition (spinner.x, spinner.y, spinner.z);
+    spinner.index = 0;
+    spinner.imagecount = 64;
+
+	for (index = 0; index < spinner.imagecount; index++) {
+		spinner.cache[index] = spinner.image.Rotate (2*Math.Pi * index/spinner.imagecount);
+	}
+
+    // Password dialog
+    entry.image = Image ("entry.png");
+    entry.sprite = Sprite (entry.image);
+    entry.x = Window.GetX () + (Window.GetWidth () - entry.image.GetWidth ()) / 2;
+    entry.y = Window.GetY () + Window.GetHeight () * 0.7;
+    entry.z = 10000;
+    entry.sprite.SetPosition (entry.x, entry.y, entry.z);
+    dialog.entry = entry;
+
+    msg = Sprite ();
+    msg.SetPosition (entry.x + 10, entry.y - 20, entry.z);
+    dialog.message = msg;
+
+    bullet.image = Image ("bullet.png");
+	bullet.max = 22;
+	bullet[0].sprite = Sprite (bullet.image);
+	bullet[0].x = entry.x + 6;
+	bullet[0].y = entry.y + 7;
+	bullet[0].z = entry.z + 1;
+	bullet[0].sprite.SetPosition (bullet[0].x, bullet[0].y, bullet[0].z);
+	for (index = 1; index < bullet.max; index++) {
+		bullet[index].sprite = Sprite (bullet.image);
+		bullet[index].x = bullet[index-1].x + 12;
+		bullet[index].y = bullet[0].y;
+		bullet[index].z = bullet[0].z;
+		bullet[index].sprite.SetPosition (bullet[index].x, bullet[index].y, bullet[index].z);
+	}
+	dialog.bullet = bullet;
+
+    show_dialog (0);
+}
+
+fun show_dialog (visible) {
+    spinner.visible = 1 - visible;
+
+    dialog.entry.sprite.SetOpacity (visible);
+    dialog.message.SetOpacity (visible);
+
+    for (index = 0; index < dialog.bullet.max; index++) {
+        dialog.bullet[index].sprite.SetOpacity (visible);
+    }
+}
+
+fun refresh_callback () {
+	spinner.index = (spinner.index + 1) % spinner.imagecount;
+	spinner.sprite.SetImage (spinner.cache[spinner.index]);
+	spinner.sprite.SetOpacity (spinner.visible);
+}
+
+fun display_normal_callback () {
+    show_dialog (0);
+}
+
+fun display_password_callback (text, nbullets) {
+    show_dialog (1);
+
+    dialog.message.SetImage (Image.Text (text, 1.0, 1.0, 1.0));
+
+	for (index = 0; index < nbullets && index < dialog.bullet.max; index++) {
+		dialog.bullet[index].sprite.SetOpacity (1);
+	}
+	for (index = nbullets; index < dialog.bullet.max; index++) {
+		dialog.bullet[index].sprite.SetOpacity (0);
+	}
+}
+
+fun display_message_callback (text) {
+    text_img = Image.Text (text, 1.0, 1.0, 1.0);
+    message.SetImage (text_img);
+    message.SetPosition (Window.GetX () + (Window.GetWidth () - text_img.GetWidth ()) / 2, Window.GetY () + Window.GetHeight () * 0.93, 2);
+}
+
+fun quit_callback () {
+    spinner.sprite.SetOpacity (0);
+}
+
+// Global variables
+spinner;
+logo;
+message;
+dialog;
+
+// Initiate all graphical elements
+init ();
+
+// Set callback functions
+Plymouth.SetRefreshFunction (refresh_callback);
+Plymouth.SetDisplayNormalFunction (display_normal_callback);
+Plymouth.SetDisplayPasswordFunction (display_password_callback);
+Plymouth.SetMessageFunction (display_message_callback);
+Plymouth.SetQuitFunction (quit_callback);
+
+// vi: ft=c

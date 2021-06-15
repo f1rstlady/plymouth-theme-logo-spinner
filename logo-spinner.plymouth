@@ -1,0 +1,10 @@
+[Plymouth Theme]
+Name=Logo Spinner
+Description=Simple logo theme with spinner
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/logo-spinner
+ScriptFile=/usr/share/plymouth/themes/logo-spinner/script
+
+# vi: ft=dosini
